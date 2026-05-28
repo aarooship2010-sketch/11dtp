@@ -1,39 +1,97 @@
-# docstring - Aarooshi Pandit - Grades tracking database
-# import
+# Import the sqlite3 library so Python can work with databases
 import sqlite3
 
-# constants and variables
+# Define the database filename as a constant variable
 DATABASE = "grades.db"
 
-# functions
+
+# FUNCTION 1: Print all students
+
 def print_all_students():
-    '''print all students nicely'''
-    db = sqlite3.connect(DATABASE)     # Connected using your constant variable
+    # Open a connection to the database file
+    db = sqlite3.connect(DATABASE)
+    # Create a cursor object to send your commands
     cursor = db.cursor()
     
-    sql = "SELECT * FROM Students;"    # selects all data from student table 
-    cursor.execute(sql)                # Execute the query
-    results = cursor.fetchall()        # Fetch the results from the cursor
+    # Write the SQL query to select everything from the Students table
+    cursor.execute("SELECT * FROM Students;")
+    # Grab all the resulting rows from the query and save them in results
+    results = cursor.fetchall()
     
-    print(f"\n{'ID':<10}{'Name':<20}{'Gender':<12}{'Ethnicity':<15}")
-    print("-" * 57)
+    # Print the column text headers on the screen
+    print("\nID        Name                 Gender       Ethnicity")
     
-    # loop through all the results
+    # Loop through each individual student row in the results list
     for student in results:
-        # student[0] = ID, student[1] = Name, student[2] = Gender, student[3] = Ethnicity
-        print(f"{student[0]:<10}{student[1]:<20}{student[2]:<12}{student[3]:<15}")
+        # Print the student details with clean spacing between columns
+        print(f"{student[0]:<10}{student[1]:<21}{student[2]:<13}{student[3]}")
     
-    # loop finished here
-    db.close()                         # Clean up and close the connection
+    # Close the database connection to clean up
+    db.close()
 
-# main code
-while True:
-    user_input = input("\nWhat would you like to do?\n1. Print all students\n2. Exit\nSelect an option (1-2): ").strip()
+# FUNCTION 2: Search student grades
+
+def search_student_grades():
+    # Open a connection to the database file
+    db = sqlite3.connect(DATABASE)
+    # Create a cursor object to send commands
+    cursor = db.cursor()
     
+    # Ask the user to type in a Student ID number
+    search_id = input("\nEnter Student ID: ").strip()
+    
+    # Write the relational query that joins all three tables together based on ID matches
+    sql = """
+    SELECT Students.Name, Classes.name, Assignments.name, Assignments.marks, Assignments.Grade
+    FROM Assignments
+    JOIN Students ON Assignments.Student_id = Students.student_id
+    JOIN Classes ON Assignments.Class_id = Classes.Class_id
+    WHERE Students.student_id = ?;
+    """
+    # Run the query, safely replacing the '?' with the ID the user typed in
+    cursor.execute(sql, (search_id,))
+    # Grab all matching grade rows and store them in 'results'
+    results = cursor.fetchall()
+    
+    # Check if the database actually found any matching rows
+    if results:
+        # Print the name of the student
+        print(f"\nGrades for {results[0][0]}:")
+        # Loop through each grade record found for that student
+        for row in results:
+            # Print the class code, assignment name, numeric mark, and letter grade
+            print(f"Class: {row[1]} | Assignment: {row[2]} | Mark: {row[3]}% | Grade: {row[4]}")
+    # If no matching rows were found in the database
+    else:
+        # Print an error message
+        print("No records found.")
+        
+    # Close the database connection safely
+    db.close()
+
+
+
+
+# MAIN MENU LOOP
+
+while True:
+    # Print the three main menu choices
+    print("\n1. Print all students")
+    print("2. Search student grades")
+    print("3. Exit")
+    
+    # Ask the user to type their choice and remove any extra spaces
+    user_input = input("Select 1, 2, or 3: ").strip()
+    
+    # If the user typed "1", run the print_all_students function
     if user_input == "1":
         print_all_students()
+    # If the user typed "2", run the search_student_grades function
     elif user_input == "2":
-        print("\nThank you for using the system. Goodbye!")
+        search_student_grades()
+    # If the user typed "3", break out of the while loop to close the program
+    elif user_input == "3":
         break
+    # If the user typed anything else, show an error message
     else:
-        print(' That was not an option. Please try again.\n')
+        print("Not an option.")
