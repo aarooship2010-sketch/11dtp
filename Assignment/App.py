@@ -1,17 +1,24 @@
+#docstring -Aarooshi Pandit-Grades tracking database
+#import
 import sqlite3
 
-#  Connect to your database file
-db = sqlite3.connect("grades.db")
-cursor = db.cursor()
-#selects all data from student table 
-sql = "SELECT * FROM Students;"
 
-#  Execute the query (this sends the command to the database)
-cursor.execute(sql)
+#constants and variables
+DATABASE = "grades.db"
 
-# Fetch the results from the cursor and print them
-results = cursor.fetchall()
-print(results)
 
-# 5. Clean up and close the connection
-db.close()
+
+#functions
+def print_all_students():
+    db = sqlite3.connect("grades.db")     #  Connect to your database file
+    cursor = db.cursor()
+    sql = "SELECT * FROM Students;"     #selects all data from student table 
+    cursor.execute(sql)            #  Execute the query (this sends the command to the database)
+    results = cursor.fetchall()     # Fetch the results from the cursor and print them
+    print(results)
+    db.close()            # 5. Clean up and close the connection
+
+
+
+#main code
+print_all_students()
