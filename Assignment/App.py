@@ -103,16 +103,58 @@ def calculate_subject_average():
     # Close the database connection safely
     db.close()
 
+# FUNCTION 4: Sort all Grades Chronologically for a specific subject
+def sort_grades_chronologically():
+    # Open a connection to the database file
+    db = sqlite3.connect(DATABASE)
+    # Create a cursor object to send commands
+    cursor = db.cursor()
+    
+    # Ask the user for the Subject name
+    search_subject = input("\nEnter Subject (e.g., Math, Science): ").strip()
+    
+    # Select the data and tell SQL to sort strictly by the completion date field
+    sql = """
+    SELECT Assignments.date, Students.Name, Assignments.name, Assignments.marks, Assignments.Grade
+    FROM Assignments
+    JOIN Students ON Assignments.Student_id = Students.student_id
+    JOIN Classes ON Assignments.Class_id = Classes.Class_id
+    WHERE Classes.Subject LIKE ?
+    ORDER BY Assignments.date ASC;
+    """
+    
+    # Run the query, replacing the '?' marker with the user's input
+    cursor.execute(sql, (search_subject,))
+    # Grab all matching sorted rows
+    results = cursor.fetchall()
+    
+    # Check if the database actually found any matching rows
+    if results:
+        # Print the success message header
+        print(f"\nResults in Chronological Order for {search_subject}:")
+        # Loop through each record found
+        for row in results:
+            # Print the line formatted with the date first so the rows flow in time order
+            print(f"Date: {row[0]} | Student: {row[1]} | Assignment: {row[2]} | Mark: {row[3]}% | Grade: {row[4]}")
+    # If no records match that subject
+    else:
+        # Print an error message
+        print("No records found for that subject.")
+        
+    # Close the database connection safely
+    db.close()
+
 # MAIN MENU LOOP
 while True:
-    # Print the four main menu choices
+    # Print the five main menu choices
     print("\n1. Print all students")
     print("2. Search student grades")
     print("3. Calculate subject average")
-    print("4. Exit")
+    print("4. Sort grades chronologically")
+    print("5. Exit")
     
     # Ask the user to type their choice and remove any extra spaces
-    user_input = input("Select 1, 2, 3, or 4: ").strip()
+    user_input = input("Select 1, 2, 3, 4, or 5: ").strip()
     
     # If the user typed "1", run the print_all_students function
     if user_input == "1":
@@ -123,8 +165,11 @@ while True:
     # If the user typed "3", run the calculate_subject_average function
     elif user_input == "3":
         calculate_subject_average()
-    # If the user typed "4", break out of the while loop to close the program
+    # If the user typed "4", run the sort_grades_chronologically function
     elif user_input == "4":
+        sort_grades_chronologically()
+    # If the user typed "5", break out of the while loop to close the program
+    elif user_input == "5":
         break
     # If the user typed anything else, show an error message
     else:
